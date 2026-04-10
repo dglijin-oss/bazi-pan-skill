@@ -653,3 +653,62 @@ DUAN_YU_KU_V2 = {
         '水弱': '注意肾脏、泌尿系统、耳朵',
     },
 }
+
+# ============== v2.2.0 神煞系统 ==============
+
+SHEN_SHA = {
+    '天乙贵人': {
+        '甲戊庚': ['丑', '未'], '乙': ['子', '申'], '丙': ['亥', '酉'],
+        '丁': ['亥', '酉'], '壬': ['巳', '卯'], '癸': ['巳', '卯'],
+        '六辛': ['寅', '午'], '六己': ['子', '申'],
+    },
+    '文昌': {
+        '甲': '巳', '乙': '午', '丙': '申', '丁': '酉', '戊': '申',
+        '己': '酉', '庚': '亥', '辛': '子', '壬': '寅', '癸': '卯',
+    },
+    '桃花': {
+        '亥卯未': '子', '寅午戌': '卯', '巳酉丑': '午', '申子辰': '酉',
+    },
+    '驿马': {
+        '申子辰': '寅', '寅午戌': '申', '巳酉丑': '亥', '亥卯未': '巳',
+    },
+    '华盖': {
+        '申子辰': '辰', '寅午戌': '戌', '巳酉丑': '丑', '亥卯未': '未',
+    },
+}
+
+def get_shen_sha(ri_gan: str, nian_zhi: str, ri_zhi: str) -> Dict:
+    """计算神煞"""
+    shen_sha = {}
+    
+    # 天乙贵人
+    for gan_group, zhi_list in SHEN_SHA['天乙贵人'].items():
+        if ri_gan in gan_group or ri_gan == gan_group[0]:
+            shen_sha['天乙贵人'] = zhi_list
+            break
+    
+    # 文昌
+    for gan, zhi in SHEN_SHA['文昌'].items():
+        if ri_gan == gan:
+            shen_sha['文昌'] = zhi
+            break
+    
+    # 桃花（按年支）
+    for zhi_group, tao_hua in SHEN_SHA['桃花'].items():
+        if nian_zhi in zhi_group:
+            shen_sha['桃花'] = tao_hua
+            break
+    
+    # 驿马（按年支）
+    for zhi_group, yi_ma in SHEN_SHA['驿马'].items():
+        if nian_zhi in zhi_group:
+            shen_sha['驿马'] = yi_ma
+            break
+    
+    # 华盖（按年支）
+    for zhi_group, hua_gai in SHEN_SHA['华盖'].items():
+        if nian_zhi in zhi_group:
+            shen_sha['华盖'] = hua_gai
+            break
+    
+    return shen_sha
