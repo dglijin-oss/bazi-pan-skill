@@ -712,3 +712,78 @@ def get_shen_sha(ri_gan: str, nian_zhi: str, ri_zhi: str) -> Dict:
             break
     
     return shen_sha
+
+# ============== v2.3.0 综合评分系统 ==============
+
+def calculate_comprehensive_score(result: Dict) -> int:
+    """计算八字综合评分 (0-100)"""
+    score = 50  # 基础分
+    
+    # 五行平衡 (0-20 分)
+    wuxing = result.get('五行统计', {})
+    counts = list(wuxing.values())
+    if max(counts) - min(counts) <= 1:
+        score += 20  # 五行平衡
+    elif max(counts) - min(counts) <= 2:
+        score += 10  # 基本平衡
+    else:
+        score += 5   # 失衡
+    
+    # 格局 (0-15 分)
+    ge_ju = result.get('格局', '')
+    good_ge_ju = ['正官格', '正印格', '食神格', '正财格']
+    if ge_ju in good_ge_ju:
+        score += 15
+    elif ge_ju:
+        score += 10
+    
+    # 用神 (0-15 分)
+    yong_shen = result.get('用神', {})
+    if yong_shen.get('旺衰') == '旺':
+        score += 15
+    elif yong_shen.get('旺衰') == '相':
+        score += 10
+    else:
+        score += 5
+    
+    # 大运 (0-10 分)
+    da_yun = result.get('大运', [])
+    if len(da_yun) >= 8:
+        score += 10
+    
+    return min(score, 100)
+
+def get_trend_advice(result: Dict) -> Dict:
+    """生成趋吉避凶建议"""
+    advice = {
+        '吉利方位': [],
+        '吉利颜色': [],
+        '吉利行业': [],
+        '注意事项': [],
+    }
+    
+    # 根据用神五行
+    yong_shen = result.get('用神', {})
+    xi_yong = yong_shen.get('喜用', [])
+    
+    wuxing_direction = {'木': '东方', '火': '南方', '土': '中央', '金': '西方', '水': '北方'}
+    wuxing_color = {'木': '绿色', '火': '红色', '土': '黄色', '金': '白色', '水': '黑色'}
+    wuxing_industry = {
+        '木': '教育、文化、出版', '火': '能源、餐饮、娱乐',
+        '土': '房地产、建筑、农业', '金': '金融、机械、珠宝',
+        '水': '贸易、物流、旅游'
+    }
+    
+    for wx in xi_yong:
+        if wx in wuxing_direction:
+            advice['吉利方位'].append(wuxing_direction[wx])
+            advice['吉利颜色'].append(wuxing_color[wx])
+            advice['吉利行业'].append(wuxing_industry[wx])
+    
+    # 注意事项
+    if result.get('五行统计', {}).get('木', 0) == 0:
+        advice['注意事项'].append('五行缺木，多接触绿色植物')
+    if result.get('五行统计', {}).get('水', 0) == 0:
+        advice['注意事项'].append('五行缺水，多喝水、近水而居')
+    
+    return advice
